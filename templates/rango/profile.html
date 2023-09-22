@@ -1,0 +1,50 @@
+{% extends "rango/base.html" %}
+{% load staticfiles %}
+
+{% block title_block %}
+  Profile
+{% endblock title_block %}
+
+{% block body_block %}
+  <div class="jumbotron p-4">
+    <div class="container">
+      <h1 class="jumbotron-heading">
+        {{selected_user.username}}'s Profile
+      </h1>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="row">
+        {% if profile.picture %}
+          <img   
+            src="{{ MEDIA_URL }}{{ profile.picture}}"
+            width="300"
+            height="300"
+            alt="{{selected_user.username}}'s profile image"
+          />
+        {% else %}
+          <img 
+            src="https://loremflickr.com/300/300"
+            alt="{{selected_user.username}}'s profile image"
+          />
+        {% endif %}
+      <br>
+      <div>
+        {# when a user logs in,  #}
+        {# "user" instance is passed to view automatically #}
+        {% if selected_user == user %}
+          <form action="." method="post" enctype='multipart/form-data'>
+            {% csrf_token %}
+            {{ form.as_p }}
+          </form>
+        {% else %}
+          <p>
+            <strong>Website:</strong>
+            <a href="{{ profile.website }}">{{ profile.website }}</a>
+          </p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock body_block %}
