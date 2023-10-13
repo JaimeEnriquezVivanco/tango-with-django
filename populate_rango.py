@@ -59,7 +59,37 @@ def populate():
             'Other Frameworks': {'pages': other_pages,
                                  'views': 32,
                                  'likes': 16
-                                }
+                                },
+            'Pascal':{
+                'pages': [],
+                'views': 0,
+                'likes': 0,
+            },
+            'Perl':{
+                'pages': [],
+                'views': 0,
+                'likes': 0,
+            },
+            'PHP':{
+                'pages': [],
+                'views': 0,
+                'likes': 0,
+            },
+            'Prolog':{
+                'pages': [],
+                'views': 0,
+                'likes': 0,
+            },
+            'PostScript':{
+                'pages': [],
+                'views': 0,
+                'likes': 0,
+            },
+            'Programming':{
+                'pages': [],
+                'views': 0,
+                'likes': 0,
+            },
             }
     
     for cat, cat_data in cats.items():

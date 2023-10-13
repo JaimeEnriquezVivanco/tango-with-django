@@ -7,3 +7,8 @@ register = template.Library()
 def get_category_list(current_category=None):
     return {'categories': Category.objects.all(),
             'current_category': current_category}
+
+@register.inclusion_tag('rango/category-pages.html')
+def get_category_pages(pages=[]):
+    context = {'pages': pages}
+    return context

@@ -9,6 +9,7 @@ from datetime import datetime
 from rango.bing_search import run_query
 from django.contrib.auth.models import User
 from rango.models import UserProfile
+from django.utils import timezone
 
 # registration imports
 from rango.forms import UserForm, UserProfileForm
@@ -116,6 +117,7 @@ class ShowCategoryView(View):
         context = self.populate_context(category_name_slug)
         return render(request, 'rango/category.html', context)
     
+    # bing search
     @method_decorator(login_required)
     def post(self, request, category_name_slug):
         context = self.populate_context(category_name_slug)
@@ -357,14 +359,15 @@ def get_server_side_cookie(request, cookie, default_val=None):
         
 class GotoUrlView(View):
     def get(self, request):
+        page_id = request.GET.get('page_id')
+        
         try:
-            page_id = request.GET.get('page_id')
-            page = Page.objects.get(id=page_id) # this can fail
-
+            page = Page.objects.get(id=page_id)
         except Page.DoesNotExist:
             return redirect(reverse('rango:index'))
 
         page.views = page.views + 1
+        page.last_visit = timezone.now()
         page.save()
         return redirect(page.url)
     
@@ -473,3 +476,69 @@ class ListProfilesView(View):
         context = {'profiles': profiles}
 
         return render(request, 'rango/list_profiles.html', context)
+    
+class LikeCategoryView(View):
+    @method_decorator(login_required)
+    def get(self, request):
+        category_id = request.GET['category_id']
+        category_id = int(category_id)
+
+        try:
+            category = Category.objects.get(id=category_id)
+        except Category.DoesNotExist:
+            return HttpResponse(-1)
+        except ValueError:
+            return HttpResponse(-1)
+        
+        category.likes += 1
+        category.save()
+        return HttpResponse(category.likes)
+    
+# aux func
+def get_category_list(max_results=0, starts_with=''):
+    '''
+    Returns list of categories that start with *starts_with*
+    Returns all categories if query is empty
+    '''
+    matches = Category.objects.filter(name__istartswith=starts_with)
+    
+    if not starts_with:
+        #empty query returns all categories
+        pass
+    elif max_results != 0 and len(matches) > max_results:
+        matches = matches[0:max_results]
+    
+    return matches
+
+class CategorySuggestionView(View):
+    def get(self, request):
+        if request.GET:
+            suggestion_query = request.GET['suggestion_query']
+            matches = get_category_list(8, suggestion_query)
+        
+        context = {'categories': matches}
+
+        return render(request,
+                      'rango/categories.html',
+                      context)
+    
+class AddSearchResultView(View):
+    @method_decorator(login_required)
+    def get(self, request):
+        category_name = request.GET.get('category_name')
+        category = Category.objects.get(name=category_name)
+        
+        new_page = Page(
+            category=category,
+            title = request.GET.get('title'),
+            url = request.GET.get('url')
+        )
+        new_page.save()
+
+        pages = Page.objects.filter(category=category).order_by('-views')
+
+        context = {'pages': pages}
+
+        return render(request,
+                      'rango/category-pages.html',
+                      context)

@@ -1,0 +1,24 @@
+{% if pages %}
+  <ul>
+    {% for page in pages %}
+      {% if page.views == 1 %}
+        <li>
+          <a href='{% url "rango:goto" %}?page_id={{page.id}}'>
+            {{ page.title }}
+          </a>
+          This page has {{page.views}} view
+        </li>
+      {% else %}
+        <li>
+          <a href='{% url "rango:goto" %}?page_id={{page.id}}'>
+            {{ page.title }}
+          </a>
+          This page has {{page.views}} views
+        </li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+  
+{% else %}
+  <strong>No pages currently in category.</strong><br />
+{% endif %}
